@@ -1,23 +1,18 @@
 FROM node:18-slim AS builder
-
 WORKDIR /app
 
+# Instalar openssl para Prisma
 RUN apt-get update -y && apt-get install -y openssl
 
 COPY package.json yarn.lock ./
 COPY prisma ./prisma/
 COPY swagger.yaml ./
-
 RUN yarn install --frozen-lockfile
-
 COPY . .
-
 RUN npx prisma generate
 RUN yarn build
 
-
 FROM node:18-slim
-
 WORKDIR /app
 
 RUN apt-get update -y && apt-get install -y openssl
@@ -28,5 +23,4 @@ COPY --from=builder /app/swagger.yaml ./
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 4444
-
-CMD ["yarn", "start"]
+CMD ["node", "dist/src/index.js"]
