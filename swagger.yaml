@@ -1,0 +1,1669 @@
+openapi: 3.0.3
+info:
+  title: MEDAPP API
+  description: MEDAPP API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Local server
+tags:
+  - name: index
+    description: Operations about index
+  - name: Nurses
+    description: Operations about nurses
+  - name: Patients
+    description: Operations about patients
+  - name: Appointments
+    description: Operations about appointments
+  - name: EmergencyContact
+    description: Operations about emergency contacts
+  - name: VitalSign
+    description: Operations about vital signs
+  - name: Catalogs
+    description: Operations about lookup data (specialties, doctors, etc.)
+  - name: MedicalHistory
+    description: Operations about medical histories
+  - name: MedicalConsultation
+    description: Operations about medical consultations
+paths:
+  /api/v1/:
+    get:
+      tags:
+        - index
+      summary: Get index
+      operationId: getIndex
+      responses:
+        "200":
+          description: Index
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+  /api/v1/users/login:
+    post:
+      tags:
+        - Users
+      summary: Login user
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Login successful (returns JWT)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: string
+                        description: JWT Token
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/doctors/{id}:
+    get:
+      tags:
+        - Doctors
+      summary: Get doctor by ID
+      operationId: getDoctorById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Doctor details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/Doctor"
+        "404":
+          description: Doctor not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+    put:
+      tags:
+        - Doctors
+      summary: Update doctor
+      operationId: updateDoctor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDoctorRequest"
+      responses:
+        "200":
+          description: Doctor updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/Doctor"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/doctors:
+    get:
+      tags:
+        - Doctors
+      summary: Get all doctors
+      operationId: getAllDoctors
+      responses:
+        "200":
+          description: List of doctors
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Doctor"
+    post:
+      tags:
+        - Doctors
+      summary: Create a new doctor
+      operationId: createDoctor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDoctorRequest"
+      responses:
+        "201":
+          description: Doctor created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/Doctor"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/nurses:
+    get:
+      tags:
+        - Nurses
+      summary: Get all nurses
+      operationId: getAllNurses
+      responses:
+        "200":
+          description: List of nurses
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Nurse"
+    post:
+      tags:
+        - Nurses
+      summary: Create a new nurse
+      operationId: createNurse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNurseRequest"
+      responses:
+        "201":
+          description: Nurse created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/Nurse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/nurses/{id}:
+    get:
+      tags:
+        - Nurses
+      summary: Get nurse by ID
+      operationId: getNurseByUserId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Nurse details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/Nurse"
+        "404":
+          description: Nurse not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+    put:
+      tags:
+        - Nurses
+      summary: Update nurse
+      operationId: updateNurse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNurseRequest"
+      responses:
+        "200":
+          description: Nurse updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/Nurse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+    delete:
+      tags:
+        - Nurses
+      summary: Delete nurse
+      operationId: removeNurse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Nurse deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/patients:
+    get:
+      tags:
+        - Patients
+      summary: Get all patients
+      operationId: getAllPatients
+      responses:
+        "200":
+          description: List of patients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Patient"
+    post:
+      tags:
+        - Patients
+      summary: Create a new patient
+      operationId: createPatient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePatientRequest"
+      responses:
+        "201":
+          description: Patient created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "400":
+          description: Bad Request
+  /api/v1/patients/{id}:
+    get:
+      tags:
+        - Patients
+      summary: Get patient by ID
+      operationId: getPatientById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Patient details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "404":
+          description: Patient not found
+    put:
+      tags:
+        - Patients
+      summary: Update patient
+      operationId: updatePatient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePatientRequest"
+      responses:
+        "200":
+          description: Patient updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "400":
+          description: Bad Request
+    delete:
+      tags:
+        - Patients
+      summary: Delete patient
+      operationId: removePatient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Patient deleted successfully
+        "400":
+          description: Bad Request
+  /api/v1/appointments:
+    get:
+      tags:
+        - Appointments
+      summary: Get all appointments
+      operationId: getAllAppointments
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      tags:
+        - Appointments
+      summary: Create a new appointment
+      operationId: createAppointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentRequest"
+      responses:
+        "201":
+          description: Appointment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+  /api/v1/appointments/{id}:
+    get:
+      tags:
+        - Appointments
+      summary: Get appointment by ID
+      operationId: getAppointmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    put:
+      tags:
+        - Appointments
+      summary: Update appointment
+      operationId: updateAppointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAppointmentRequest"
+      responses:
+        "200":
+          description: Appointment updated successfully
+    delete:
+      tags:
+        - Appointments
+      summary: Delete appointment
+      operationId: removeAppointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment deleted successfully
+  /api/v1/appointments/patient/{patientId}:
+    get:
+      tags:
+        - Appointments
+      summary: Get appointments by patient ID
+      operationId: getAppointmentByPatientId
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+  /api/v1/appointments/doctor/{doctorId}:
+    get:
+      tags:
+        - Appointments
+      summary: Get appointments by doctor ID
+      operationId: getAppointmentByDoctorId
+      parameters:
+        - name: doctorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+  /api/v1/emergencyContact/{patientId}:
+    get:
+      tags:
+        - EmergencyContact
+      summary: Get emergency contacts by patient ID
+      operationId: getByPatientIdController
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of emergency contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmergencyContact"
+  /api/v1/emergencyContact:
+    post:
+      tags:
+        - EmergencyContact
+      summary: Create a new emergency contact
+      operationId: createEmergencyContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmergencyContactRequest"
+      responses:
+        "201":
+          description: Emergency contact created successfully
+  /api/v1/emergencyContact/{id}:
+    put:
+      tags:
+        - EmergencyContact
+      summary: Update emergency contact
+      operationId: updateEmergencyContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmergencyContactRequest"
+      responses:
+        "200":
+          description: Emergency contact updated successfully
+    delete:
+      tags:
+        - EmergencyContact
+      summary: Delete emergency contact
+      operationId: removeEmergencyContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Emergency contact deleted successfully
+  /api/v1/vitalSign:
+    post:
+      tags:
+        - VitalSign
+      summary: Create a new vital sign
+      operationId: createVitalSign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVitalSignRequest"
+      responses:
+        "201":
+          description: Vital sign created successfully
+  /api/v1/vitalSign/{id}:
+    put:
+      tags:
+        - VitalSign
+      summary: Update vital sign
+      operationId: updateVitalSign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateVitalSignRequest"
+      responses:
+        "200":
+          description: Vital sign updated successfully
+    delete:
+      tags:
+        - VitalSign
+      summary: Delete vital sign
+      operationId: removeVitalSign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vital sign deleted successfully
+  /api/v1/vitalSign/appointment/{id}:
+    get:
+      tags:
+        - VitalSign
+      summary: Get vital sign by appointment ID
+      operationId: getByAppointmentId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vital sign details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VitalSign"
+  /api/v1/medical-history:
+    get:
+      tags:
+        - MedicalHistory
+      summary: Get all medical histories
+      operationId: getAllMedicalHistories
+      responses:
+        "200":
+          description: List of medical histories
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/MedicalHistory"
+    post:
+      tags:
+        - MedicalHistory
+      summary: Create a new medical history
+      operationId: createMedicalHistory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMedicalHistoryRequest"
+      responses:
+        "201":
+          description: Medical history created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalHistory"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/medical-history/patient/{patientId}:
+    get:
+      tags:
+        - MedicalHistory
+      summary: Get medical history by patient ID
+      operationId: getMedicalHistoryByPatientId
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical history details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalHistory"
+        "404":
+          description: Medical history not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+    put:
+      tags:
+        - MedicalHistory
+      summary: Update medical history
+      operationId: updateMedicalHistory
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMedicalHistoryRequest"
+      responses:
+        "200":
+          description: Medical history updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalHistory"
+    delete:
+      tags:
+        - MedicalHistory
+      summary: Delete medical history
+      operationId: removeMedicalHistory
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical history deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/medical-consultations:
+    get:
+      tags:
+        - MedicalConsultation
+      summary: Get all medical consultations
+      operationId: getAllConsultations
+      responses:
+        "200":
+          description: List of medical consultations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/MedicalConsultation"
+    post:
+      tags:
+        - MedicalConsultation
+      summary: Create a new medical consultation
+      operationId: createConsultation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMedicalConsultationRequest"
+      responses:
+        "201":
+          description: Medical consultation created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalConsultation"
+  /api/v1/medical-consultations/{id}:
+    get:
+      tags:
+        - MedicalConsultation
+      summary: Get medical consultation by ID
+      operationId: getConsultationById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical consultation details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalConsultation"
+        "404":
+          description: Medical consultation not found
+    put:
+      tags:
+        - MedicalConsultation
+      summary: Update medical consultation
+      operationId: updateConsultation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMedicalConsultationRequest"
+      responses:
+        "200":
+          description: Medical consultation updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalConsultation"
+    delete:
+      tags:
+        - MedicalConsultation
+      summary: Delete medical consultation
+      operationId: removeConsultation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical consultation deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TResult"
+  /api/v1/medical-consultations/patient/{patientId}:
+    get:
+      tags:
+        - MedicalConsultation
+      summary: Get medical consultations by patient ID
+      operationId: getConsultationsByPatientId
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of medical consultations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/MedicalConsultation"
+  /api/v1/medical-consultations/appointment/{appointmentId}:
+    get:
+      tags:
+        - MedicalConsultation
+      summary: Get medical consultation by appointment ID
+      operationId: getConsultationByAppointmentId
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical consultation details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        $ref: "#/components/schemas/MedicalConsultation"
+        "404":
+          description: Medical consultation not found
+  /api/v1/catalogs/specialties:
+    get:
+      tags:
+        - Catalogs
+      summary: Get all specialties
+      operationId: getSpecialties
+      responses:
+        "200":
+          description: List of specialties
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+  /api/v1/catalogs/doctors:
+    get:
+      tags:
+        - Catalogs
+      summary: Get all doctors for lookup
+      operationId: getDoctorsLookup
+      responses:
+        "200":
+          description: List of doctors (id, name, lastName)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TResult"
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            lastName:
+                              type: string
+components:
+  schemas:
+    TResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+    
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, DOCTOR, NURSE]
+        createdAt:
+          type: string
+          format: date-time
+    
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        licenseNumber:
+          type: string
+        specialty:
+          type: string
+        subSpecialty:
+          type: string
+        phone:
+          type: string
+        officePhone:
+          type: string
+          
+    CreateDoctorRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+        - lastName
+        - licenseNumber
+        - specialty
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        name:
+          type: string
+        lastName:
+          type: string
+        licenseNumber:
+          type: string
+        specialty:
+          type: string
+        subSpecialty:
+          type: string
+        phone:
+          type: string
+        officePhone:
+          type: string
+    
+    UpdateDoctorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        lastName:
+          type: string
+        specialty:
+          type: string
+        subSpecialty:
+          type: string
+        phone:
+          type: string
+        officePhone:
+          type: string
+    
+    Nurse:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        license:
+          type: string
+        officePhone:
+          type: string
+
+    CreateNurseRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+        - LastName
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        name:
+          type: string
+        LastName:
+          type: string
+        phone:
+          type: string
+        license:
+          type: string
+        officePhone:
+          type: string
+
+    UpdateNurseRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        LastName:
+          type: string
+        phone:
+          type: string
+        license:
+          type: string
+        officePhone:
+          type: string
+
+    Patient:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date-time
+        gender:
+          $ref: "#/components/schemas/Gender"
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreatePatientRequest:
+      type: object
+      required:
+        - name
+        - lastName
+        - birthDate
+        - gender
+        - phone
+        - email
+        - address
+      properties:
+        name:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date-time
+        gender:
+          $ref: "#/components/schemas/Gender"
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        isActive:
+          type: boolean
+
+    UpdatePatientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date-time
+        gender:
+          $ref: "#/components/schemas/Gender"
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        isActive:
+          type: boolean
+
+    Gender:
+      type: string
+      enum: [MALE, FEMALE, OTHER]
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        time:
+          type: string
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/AppointmentStatus"
+        patientId:
+          type: integer
+        doctorId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - date
+        - time
+        - reason
+        - status
+        - patientId
+        - doctorId
+      properties:
+        date:
+          type: string
+          format: date-time
+        time:
+          type: string
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/AppointmentStatus"
+        patientId:
+          type: integer
+        doctorId:
+          type: integer
+
+    UpdateAppointmentRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        time:
+          type: string
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/AppointmentStatus"
+
+    AppointmentStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+
+    EmergencyContact:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        patientId:
+          type: integer
+
+    CreateEmergencyContactRequest:
+      type: object
+      required:
+        - name
+        - lastName
+        - phone
+        - email
+        - address
+        - patientId
+      properties:
+        name:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        patientId:
+          type: integer
+
+    UpdateEmergencyContactRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+
+    VitalSign:
+      type: object
+      properties:
+        id:
+          type: integer
+        temperature:
+          type: number
+        heartRate:
+          type: integer
+        bloodPressure:
+          type: string
+        oxygenSaturation:
+          type: integer
+        respiratoryRate:
+          type: integer
+        weight:
+          type: number
+        height:
+          type: number
+        appointmentId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateVitalSignRequest:
+      type: object
+      required:
+        - temperature
+        - heartRate
+        - bloodPressure
+        - oxygenSaturation
+        - respiratoryRate
+        - weight
+        - height
+        - appointmentId
+      properties:
+        temperature:
+          type: number
+        heartRate:
+          type: integer
+        bloodPressure:
+          type: string
+        oxygenSaturation:
+          type: integer
+        respiratoryRate:
+          type: integer
+        weight:
+          type: number
+        height:
+          type: number
+        appointmentId:
+          type: integer
+
+    UpdateVitalSignRequest:
+      type: object
+      properties:
+        temperature:
+          type: number
+        heartRate:
+          type: integer
+        bloodPressure:
+          type: string
+        oxygenSaturation:
+          type: integer
+        respiratoryRate:
+          type: integer
+        weight:
+          type: number
+        height:
+          type: number
+
+    MedicalHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientId:
+          type: integer
+        allergies:
+          type: string
+          nullable: true
+        medications:
+          type: string
+          nullable: true
+        surgeries:
+          type: string
+          nullable: true
+        familyHistory:
+          type: string
+          nullable: true
+        chronicConditions:
+          type: string
+          nullable: true
+        gestationalHistory:
+          type: string
+          nullable: true
+        reproductiveHistory:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateMedicalHistoryRequest:
+      type: object
+      required:
+        - patientId
+      properties:
+        patientId:
+          type: integer
+        allergies:
+          type: string
+          nullable: true
+        medications:
+          type: string
+          nullable: true
+        surgeries:
+          type: string
+          nullable: true
+        familyHistory:
+          type: string
+          nullable: true
+        chronicConditions:
+          type: string
+          nullable: true
+        gestationalHistory:
+          type: string
+          nullable: true
+        reproductiveHistory:
+          type: string
+          nullable: true
+
+    UpdateMedicalHistoryRequest:
+      type: object
+      properties:
+        allergies:
+          type: string
+          nullable: true
+        medications:
+          type: string
+          nullable: true
+        surgeries:
+          type: string
+          nullable: true
+        familyHistory:
+          type: string
+          nullable: true
+        chronicConditions:
+          type: string
+          nullable: true
+        gestationalHistory:
+          type: string
+          nullable: true
+        reproductiveHistory:
+          type: string
+          nullable: true
+
+    MedicalConsultation:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientId:
+          type: integer
+        doctorId:
+          type: integer
+        appointmentId:
+          type: integer
+        symptoms:
+          type: string
+        physicalExam:
+          type: string
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+        recommendations:
+          type: string
+          nullable: true
+        followUp:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateMedicalConsultationRequest:
+      type: object
+      required:
+        - patientId
+        - doctorId
+        - appointmentId
+        - symptoms
+        - physicalExam
+        - diagnosis
+        - treatment
+      properties:
+        patientId:
+          type: integer
+        doctorId:
+          type: integer
+        appointmentId:
+          type: integer
+        symptoms:
+          type: string
+        physicalExam:
+          type: string
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+        recommendations:
+          type: string
+          nullable: true
+        followUp:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    UpdateMedicalConsultationRequest:
+      type: object
+      properties:
+        symptoms:
+          type: string
+        physicalExam:
+          type: string
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+        recommendations:
+          type: string
+          nullable: true
+        followUp:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+

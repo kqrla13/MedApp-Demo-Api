@@ -1,0 +1,205 @@
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    ADMIN
+    DOCTOR
+    NURSE
+    ASSISTENT
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    password  String
+    role      Role
+    isActive  Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    doctor    Doctor?
+    nurse     Nurse?
+}
+
+model Doctor {
+    id            Int     @id @default(autoincrement())
+    userId        Int     @unique
+    name          String
+    lastName      String
+    email         String  @unique
+    licenseNumber String  @unique
+    specialty     String
+    subSpecialty  String?
+    phone         String
+    officePhone   String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    isActive  Boolean  @default(true)
+
+    user                 User                  @relation(fields: [userId], references: [id])
+    appointments         Appointment[]
+    medicalConsultations MedicalConsultation[]
+}
+
+model Nurse {
+    id          Int     @id @default(autoincrement())
+    userId      Int     @unique
+    name        String
+    lastName    String
+    license     String?
+    phone       String
+    email       String  @unique
+    officePhone String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    isActive  Boolean  @default(true)
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model Patient {
+    id        Int      @id @default(autoincrement())
+    name      String
+    lastName  String
+    birthDate DateTime
+    gender    Gender
+    phone     String
+    email     String   @unique
+    address   String
+    isActive  Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    emergencyContacts    EmergencyContact[]
+    appointments         Appointment[]
+    vitalSigns           vitalSign[]
+    medicalConsultations MedicalConsultation[]
+    medicalHistories     MedicalHistory[]
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHER
+}
+
+model EmergencyContact {
+    id        Int     @id @default(autoincrement())
+    name      String
+    lastName  String
+    phone     String
+    email     String  @unique
+    address   String
+    patientId Int
+    patient   Patient @relation(fields: [patientId], references: [id])
+}
+
+model Appointment {
+    id        Int                  @id @default(autoincrement())
+    date      DateTime
+    time      String
+    reason    String
+    status    AppointmentStatus
+    patientId Int
+    doctorId  Int
+    specialty AppointmentSpecialty
+
+    patient    Patient     @relation(fields: [patientId], references: [id])
+    doctor     Doctor      @relation(fields: [doctorId], references: [id])
+    vitalSigns vitalSign[]
+
+    createdAt            DateTime              @default(now())
+    updatedAt            DateTime              @updatedAt
+    medicalConsultations MedicalConsultation[]
+}
+
+enum AppointmentStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+    COMPLETED
+}
+
+enum AppointmentSpecialty {
+    GENERAL
+    PEDIATRIC
+    SURGICAL
+    DENTAL
+    PSYCHOLOGICAL
+    GYNECOLOGICAL
+    OBSTETRIC
+    CARDIOLOGY
+    PULMONARY
+    NEUROLOGY
+    RHEUMATOLOGY
+    ONCOLOGY
+    DERMATOLOGY
+    GASTROENTEROLOGY
+    UROLOGY
+    NUTRITION
+}
+
+model vitalSign {
+    id               Int    @id @default(autoincrement())
+    appointmentId    Int
+    temperature      Float
+    heartRate        Int
+    bloodPressure    String
+    oxygenSaturation Int
+    respiratoryRate  Int
+    weight           Float
+    height           Float
+
+    appointment Appointment @relation(fields: [appointmentId], references: [id])
+    patient     Patient?    @relation(fields: [patientId], references: [id])
+    patientId   Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MedicalHistory {
+    id        Int @id @default(autoincrement())
+    patientId Int @unique
+
+    allergies           String?
+    medications         String?
+    surgeries           String?
+    familyHistory       String?
+    chronicConditions   String?
+    gestationalHistory  String?
+    reproductiveHistory String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model MedicalConsultation {
+    id            Int @id @default(autoincrement())
+    patientId     Int
+    doctorId      Int
+    appointmentId Int
+
+    symptoms        String
+    physicalExam    String
+    diagnosis       String
+    treatment       String
+    recommendations String?
+    followUp        String?
+    notes           String?
+
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    patient     Patient     @relation(fields: [patientId], references: [id])
+    doctor      Doctor      @relation(fields: [doctorId], references: [id])
+    appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
