@@ -1,4 +1,5 @@
 import { prismaClient } from "@src/core/config/database";
+import { hashPassword } from "@src/core/utils/security";
 
 export const getUsers = async () => {
   return prismaClient.user.findMany({
@@ -13,12 +14,20 @@ export const getUserByEmail = async (email: string) => {
     where: {
       email,
     },
+    include: {
+      doctor: true,
+      nurse: true,
+    },
   });
 };
 
 export const addUser = async (data: any) => {
+  const hashedPassword = await hashPassword(data.password);
   return prismaClient.user.create({
-    data,
+    data: {
+      ...data,
+      password: hashedPassword,
+    },
   });
 };
 

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import { createPatient, getAllPatients, getPatientById, removePatient, updatePatient } from "./patient.controller";
+import { roleValidator } from "@src/core/middlewares/role-validator.middleware";
 
 const router = Router();
 
-router.post("/", createPatient);
-router.get("/", getAllPatients);
-router.get("/:id", getPatientById);
-router.put("/:id", updatePatient);
-router.delete("/:id", removePatient);
+router.post("/", roleValidator(['ADMIN', 'NURSE']), createPatient);
+router.get("/", roleValidator(['ADMIN', 'NURSE', 'DOCTOR']), getAllPatients);
+router.get("/:id", roleValidator(['ADMIN', 'NURSE', 'DOCTOR']), getPatientById);
+router.put("/:id", roleValidator(['ADMIN', 'NURSE']), updatePatient);
+router.delete("/:id", roleValidator(['ADMIN', 'NURSE']), removePatient);
 
-export default router; 
+export default router;
